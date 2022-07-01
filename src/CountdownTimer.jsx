@@ -1,39 +1,55 @@
 import React,{useState,useEffect} from 'react'
 
-const CountDownTimer = ({hoursMinSecs}) => {
-   
-    const { hours = 0, minutes = 0, seconds = 60 } = hoursMinSecs;
-    const [[hrs, mins, secs], setTime] = useState([hours, minutes, seconds]);
-    
+const CountDownTimer = () => {
+  // ...
 
-    const tick = () => {
-   
-        if (hrs === 0 && mins === 0 && secs === 0) 
-            reset()
-        else if (mins === 0 && secs === 0) {
-            setTime([hrs - 1, 59, 59]);
-        } else if (secs === 0) {
-            setTime([hrs, mins - 1, 59]);
-        } else {
-            setTime([hrs, mins, secs - 1]);
-        }
+const calculateTimeLeft = () => {
+  let year = new Date().getFullYear();
+  const difference = +new Date(`8/20/${year}`) - +new Date();
+
+  let timeLeft={}
+
+  if (difference > 0) {
+    timeLeft = {
+      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((difference / 1000 / 60) % 60),
+      seconds: Math.floor((difference / 1000) % 60)
     };
+  }
+
+  return timeLeft; 
+};
+
+const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+const [year] = useState(new Date().getFullYear());
 
 
-    const reset = () => setTime([parseInt(hours), parseInt(minutes), parseInt(seconds)]);
+ useEffect(() => {
+    setTimeout(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+  });
 
-    
-    useEffect(() => {
-        const timerId = setInterval(() => tick(), 1000);
-        return () => clearInterval(timerId);
-    });
+  const timerComponents = [];
 
-    
-    return (
+  Object.keys(timeLeft).forEach((interval) => {
+    if (!timeLeft[interval]) {
+      return;
+    }
+
+    timerComponents.push(
+      <span>
+        {timeLeft[interval]} {interval}{" "}
+      </span>
+    );
+  });
+
+// ...
+   
+      return (
         <div>
-            <p>{`${hrs.toString().padStart(2, '0')}:${mins
-            .toString()
-            .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`}</p> 
+               {timerComponents.length ? timerComponents : <span>Time's up!</span>}
         </div>
     );
 }
